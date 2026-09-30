@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | Smart Expense Tracker{% endblock %}
+
+{% block content %}
+
+<div class="app-shell">
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-mark">S</div>
+
+            <div>
+                <h2>Smart Expense</h2>
+                <p>Personal Finance</p>
+            </div>
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('add_transaction') }}" class="nav-item">
+                <span class="nav-icon">＋</span>
+                <span>Add Transaction</span>
+            </a>
+
+            <a href="{{ url_for('transactions') }}" class="nav-item">
+                <span class="nav-icon">☷</span>
+                <span>Transactions</span>
+            </a>
+
+            <a href="{{ url_for('budget') }}" class="nav-item">
+                <span class="nav-icon">▣</span>
+                <span>Budget</span>
+            </a>
+
+            <a href="{{ url_for('reports') }}" class="nav-item">
+                <span class="nav-icon">◌</span>
+                <span>Reports</span>
+            </a>
+
+            <a href="{{ url_for('profile') }}" class="nav-item active">
+                <span class="nav-icon">◯</span>
+                <span>Profile</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+                    {{ session.get("user_name", "U")[0]|upper }}
+                </div>
+
+                <div>
+                    <strong>
+                        {{ session.get("user_name", "User") }}
+                    </strong>
+
+                    <span>Personal account</span>
+                </div>
+
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <main class="dashboard-main">
+
+        <div class="page-header">
+
+            <div>
+                <p class="eyebrow">ACCOUNT</p>
+
+                <h1>Profile</h1>
+
+                <p class="page-subtitle">
+                    Manage your personal account information.
+                </p>
+            </div>
+
+        </div>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                <div class="profile-messages">
+
+                    {% for category, message in messages %}
+
+                        <div class="profile-message {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <section class="profile-page">
+
+            <div class="profile-card">
+
+                <div class="profile-card-header">
+
+                    <div class="profile-avatar-large">
+                        {{ user.name[0]|upper }}
+                    </div>
+
+                    <div>
+                        <h2>{{ user.name }}</h2>
+                        <p>{{ user.email }}</p>
+                    </div>
+
+                </div>
+
+
+                <div class="profile-divider"></div>
+
+
+                <form
+                    method="POST"
+                    action="{{ url_for('profile') }}"
+                    class="profile-form"
+                >
+
+                    <div class="profile-section-heading">
+
+                        <p class="card-label">PERSONAL INFORMATION</p>
+
+                        <h3>Account details</h3>
+
+                    </div>
+
+
+                    <div class="profile-form-group">
+
+                        <label for="name">
+                            Full name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value="{{ user.name }}"
+                            placeholder="Enter your name"
+                            maxlength="100"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="profile-form-group">
+
+                        <label for="email">
+                            Email address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ user.email }}"
+                            placeholder="Enter your email"
+                            maxlength="150"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="profile-form-actions">
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                        >
+                            Save changes
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+            <div class="profile-card account-info-card">
+
+                <div class="profile-section-heading">
+
+                    <p class="card-label">ACCOUNT</p>
+
+                    <h3>Account information</h3>
+
+                </div>
+
+
+                <div class="account-info-list">
+
+                    <div class="account-info-row">
+
+                        <span>Account type</span>
+
+                        <strong>
+                            Personal account
+                        </strong>
+
+                    </div>
+
+
+                    <div class="account-info-row">
+
+                        <span>Member since</span>
+
+                        <strong>
+                            {{ user.created_at }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="account-info-row">
+
+                        <span>Account ID</span>
+
+                        <strong>
+                            #{{ user.id }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+{% endblock %}

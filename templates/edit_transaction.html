@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Transaction | Smart Expense Tracker{% endblock %}
+
+{% block content %}
+
+<div class="app-shell">
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-mark">S</div>
+
+            <div>
+                <h2>Smart Expense</h2>
+                <p>Personal Finance</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('add_transaction') }}" class="nav-item">
+                <span class="nav-icon">＋</span>
+                <span>Add Transaction</span>
+            </a>
+
+            <a href="{{ url_for('transactions') }}" class="nav-item">
+                <span class="nav-icon">☷</span>
+                <span>Transactions</span>
+            </a>
+
+           <a href="{{ url_for('budget') }}" class="nav-item">
+                <span class="nav-icon">▣</span>
+                <span>Budget</span>
+            </a>
+
+            <a href="{{ url_for('reports') }}" class="nav-item">
+                <span class="nav-icon">◌</span>
+                <span>Reports</span>
+            </a>
+
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <span class="nav-icon">◯</span>
+                <span>Profile</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+                    {{ session.get("user_name", "U")[0]|upper }}
+                </div>
+
+                <div>
+                    <strong>
+                        {{ session.get("user_name", "User") }}
+                    </strong>
+
+                    <span>Personal account</span>
+                </div>
+
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <main class="dashboard-main">
+
+        <div class="page-header">
+
+            <div>
+                <p class="eyebrow">ACTIVITY</p>
+
+                <h1>Edit transaction</h1>
+
+                <p class="page-subtitle">
+                    Update the details of this transaction.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('transactions') }}"
+                class="secondary-button"
+            >
+                ← Back to transactions
+            </a>
+
+        </div>
+
+
+        <section class="transaction-page">
+
+            <div class="transaction-card">
+
+                <form
+                    method="POST"
+                    class="transaction-form"
+                >
+
+                    <!-- Transaction Type -->
+
+                    <div class="form-group">
+
+                        <label for="type">
+                            Transaction type
+                        </label>
+
+                        <select
+                            id="type"
+                            name="type"
+                            required
+                        >
+
+                            <option
+                                value="expense"
+                                {% if transaction.type == "expense" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Expense
+                            </option>
+
+                            <option
+                                value="income"
+                                {% if transaction.type == "income" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Income
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Category -->
+
+                    <div class="form-group">
+
+                        <label for="category_id">
+                            Category
+                        </label>
+
+                        <select
+                            id="category_id"
+                            name="category_id"
+                            required
+                        >
+
+                            {% for category in categories %}
+
+                                <option
+                                    value="{{ category.id }}"
+                                    data-type="{{ category.type }}"
+                                    {% if category.id == transaction.category_id %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ category.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Amount -->
+
+                    <div class="form-group">
+
+                        <label for="amount">
+                            Amount
+                        </label>
+
+                        <div class="amount-input">
+
+                            <span>₹</span>
+
+                            <input
+                                type="number"
+                                id="amount"
+                                name="amount"
+                                value="{{ transaction.amount }}"
+                                min="0.01"
+                                step="0.01"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Date -->
+
+                    <div class="form-group">
+
+                        <label for="date">
+                            Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="date"
+                            name="date"
+                            value="{{ transaction.date }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Description -->
+
+                    <div class="form-group">
+
+                        <label for="description">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="4"
+                            placeholder="Add a short description..."
+                        >{{ transaction.description or "" }}</textarea>
+
+                    </div>
+
+
+                    <!-- Form Actions -->
+
+                    <div class="form-actions">
+
+                        <a
+                            href="{{ url_for('transactions') }}"
+                            class="secondary-button"
+                        >
+                            Cancel
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                        >
+                            Save changes
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+{% endblock %}

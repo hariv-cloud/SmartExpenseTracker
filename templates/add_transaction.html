@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}Add Transaction | Smart Expense Tracker{% endblock %}
+
+{% block content %}
+
+<div class="app-shell">
+
+    <aside class="app-sidebar">
+
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-mark">S</div>
+
+            <div>
+                <div class="sidebar-brand-name">
+                    Smart Expense
+                </div>
+
+                <div class="sidebar-brand-subtitle">
+                    Personal Finance
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('add_transaction') }}"
+               class="nav-item active">
+                <span class="nav-icon">＋</span>
+                <span>Add Transaction</span>
+            </a>
+
+           <a href="{{ url_for('transactions') }}" class="nav-item">
+                <span class="nav-icon">☷</span>
+                <span>Transactions</span>
+            </a>
+
+            <a href="{{ url_for('budget') }}" class="nav-item">
+                <span class="nav-icon">▣</span>
+                <span>Budget</span>
+            </a>
+
+            <a href="{{ url_for('reports') }}" class="nav-item">
+                <span class="nav-icon">◌</span>
+                <span>Reports</span>
+            </a>
+
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                 <span class="nav-icon">◯</span>
+                <span>Profile</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-user">
+
+                <div class="user-avatar">
+                    {{ session["user_name"][0]|upper }}
+                </div>
+
+                <div class="sidebar-user-info">
+
+                    <div class="sidebar-user-name">
+                        {{ session["user_name"] }}
+                    </div>
+
+                    <div class="sidebar-user-label">
+                        Personal account
+                    </div>
+
+                </div>
+
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Log out
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="page-header">
+
+            <div>
+                <p class="eyebrow">TRANSACTION</p>
+
+                <h1>Add transaction</h1>
+
+                <p class="page-description">
+                    Record your income or spending to keep your finances up to date.
+                </p>
+            </div>
+
+        </header>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+
+                <div class="flash-container">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash-message {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+        {% endwith %}
+
+
+        <section class="transaction-page">
+
+            <div class="transaction-card">
+
+                <form
+                    method="POST"
+                    action="{{ url_for('add_transaction') }}"
+                    class="transaction-form"
+                >
+
+                    <div class="form-section">
+
+                        <div class="section-heading">
+
+                            <h2>Transaction details</h2>
+
+                            <p>
+                                Enter the details below and we'll take care of the rest.
+                            </p>
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label>
+                                Transaction type
+                            </label>
+
+                            <div class="type-selector">
+
+                                <label class="type-option">
+
+                                    <input
+                                        type="radio"
+                                        name="type"
+                                        value="expense"
+                                        checked
+                                    >
+
+                                    <span class="type-option-content">
+
+                                        <span class="type-option-title">
+                                            Expense
+                                        </span>
+
+                                        <span class="type-option-description">
+                                            Money you've spent
+                                        </span>
+
+                                    </span>
+
+                                </label>
+
+
+                                <label class="type-option">
+
+                                    <input
+                                        type="radio"
+                                        name="type"
+                                        value="income"
+                                    >
+
+                                    <span class="type-option-content">
+
+                                        <span class="type-option-title">
+                                            Income
+                                        </span>
+
+                                        <span class="type-option-description">
+                                            Money you've received
+                                        </span>
+
+                                    </span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-row">
+
+                            <div class="form-field">
+
+                                <label for="category_id">
+                                    Category
+                                </label>
+
+                                <select
+                                    id="category_id"
+                                    name="category_id"
+                                    required
+                                >
+
+                                    <option value="">
+                                        Select a category
+                                    </option>
+
+                                    {% for category in categories %}
+
+                                        <option
+                                            value="{{ category['id'] }}"
+                                            data-type="{{ category['type'] }}"
+                                        >
+                                            {{ category['name'] }}
+                                        </option>
+
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="amount">
+                                    Amount
+                                </label>
+
+                                <div class="amount-input">
+
+                                    <span>₹</span>
+
+                                    <input
+                                        type="number"
+                                        id="amount"
+                                        name="amount"
+                                        min="0.01"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        required
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="date">
+                                Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="date"
+                                name="date"
+                                value="{{ request.form.get('date', '') }}"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="description">
+                                Description
+                                <span class="optional-label">
+                                    Optional
+                                </span>
+                            </label>
+
+                            <textarea
+                                id="description"
+                                name="description"
+                                rows="4"
+                                maxlength="250"
+                                placeholder="Add a note about this transaction..."
+                            >{{ request.form.get('description', '') }}</textarea>
+
+                            <div class="field-hint">
+                                A short note can help you remember what this transaction was for.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-actions">
+
+                        <a
+                            href="{{ url_for('dashboard') }}"
+                            class="secondary-button"
+                        >
+                            Cancel
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                        >
+                            Save transaction
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+            <aside class="transaction-help">
+
+                <div class="help-card">
+
+                    <div class="help-icon">
+                        ₹
+                    </div>
+
+                    <h3>
+                        Keep it accurate
+                    </h3>
+
+                    <p>
+                        Recording transactions as they happen makes your monthly
+                        spending picture much more useful.
+                    </p>
+
+                </div>
+
+
+                <div class="help-card">
+
+                    <h3>
+                        Your categories
+                    </h3>
+
+                    <p>
+                        Choose the category that best describes the transaction.
+                        You can use the same categories consistently to make your
+                        spending reports easier to understand.
+                    </p>
+
+                </div>
+
+            </aside>
+
+        </section>
+
+    </main>
+
+</div>
+
+{% endblock %}

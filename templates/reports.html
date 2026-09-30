@@ -1,0 +1,598 @@
+{% extends "base.html" %}
+
+{% block title %}Reports | Smart Expense Tracker{% endblock %}
+
+{% block content %}
+
+<div class="app-shell">
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-mark">S</div>
+
+            <div>
+                <h2>Smart Expense</h2>
+                <p>Personal Finance</p>
+            </div>
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('add_transaction') }}" class="nav-item">
+                <span class="nav-icon">＋</span>
+                <span>Add Transaction</span>
+            </a>
+
+            <a href="{{ url_for('transactions') }}" class="nav-item">
+                <span class="nav-icon">☷</span>
+                <span>Transactions</span>
+            </a>
+
+            <a href="{{ url_for('budget') }}" class="nav-item">
+                <span class="nav-icon">▣</span>
+                <span>Budget</span>
+            </a>
+
+            <a href="{{ url_for('reports') }}" class="nav-item active">
+                <span class="nav-icon">◌</span>
+                <span>Reports</span>
+            </a>
+
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <span class="nav-icon">◯</span>
+                <span>Profile</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+                    {{ session.get("user_name", "U")[0]|upper }}
+                </div>
+
+                <div>
+                    <strong>
+                        {{ session.get("user_name", "User") }}
+                    </strong>
+
+                    <span>Personal account</span>
+                </div>
+
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <main class="dashboard-main">
+
+        <div class="page-header">
+
+            <div>
+
+                <p class="eyebrow">
+                    ANALYSIS
+                </p>
+
+                <h1>
+                    Financial reports
+                </h1>
+
+                <p class="page-subtitle">
+                    Understand your income, expenses and spending patterns.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <section class="reports-page">
+
+            <!-- Summary cards -->
+
+            <div class="reports-summary-grid">
+
+
+                <div class="report-summary-card">
+
+                    <div class="report-summary-top">
+
+                        <span>
+                            Total income
+                        </span>
+
+                        <span class="report-icon income-icon">
+                            ↑
+                        </span>
+
+                    </div>
+
+                    <strong>
+                        ₹{{ "%.2f"|format(total_income) }}
+                    </strong>
+
+                    <p>
+                        All recorded income
+                    </p>
+
+                </div>
+
+
+                <div class="report-summary-card">
+
+                    <div class="report-summary-top">
+
+                        <span>
+                            Total expenses
+                        </span>
+
+                        <span class="report-icon expense-icon">
+                            ↓
+                        </span>
+
+                    </div>
+
+                    <strong>
+                        ₹{{ "%.2f"|format(total_expenses) }}
+                    </strong>
+
+                    <p>
+                        All recorded expenses
+                    </p>
+
+                </div>
+
+
+                <div class="report-summary-card">
+
+                    <div class="report-summary-top">
+
+                        <span>
+                            Net balance
+                        </span>
+
+                        <span class="report-icon balance-icon">
+                            =
+                        </span>
+
+                    </div>
+
+                    <strong>
+                        ₹{{ "%.2f"|format(total_income - total_expenses) }}
+                    </strong>
+
+                    <p>
+                        Income minus expenses
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- Charts -->
+
+            <div class="reports-content-grid">
+
+
+                <!-- Expenses by category -->
+
+                <div class="report-card chart-card">
+
+                    <div class="report-card-header">
+
+                        <div>
+
+                            <p class="card-label">
+                                SPENDING
+                            </p>
+
+                            <h2>
+                                Expenses by category
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    {% if category_expenses %}
+
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+
+
+                        <div class="category-report-list">
+
+                            {% for category in category_expenses %}
+
+                                <div class="category-report-row">
+
+                                    <div class="category-report-name">
+
+                                        <span class="category-dot"></span>
+
+                                        <span>
+                                            {{ category.name }}
+                                        </span>
+
+                                    </div>
+
+                                    <strong>
+                                        ₹{{ "%.2f"|format(category.total) }}
+                                    </strong>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                    {% else %}
+
+                        <div class="report-empty-state">
+
+                            <p>
+                                No expense data available yet.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Income vs expenses -->
+
+                <div class="report-card chart-card">
+
+                    <div class="report-card-header">
+
+                        <div>
+
+                            <p class="card-label">
+                                MONTHLY TREND
+                            </p>
+
+                            <h2>
+                                Income vs expenses
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    {% if monthly_summary %}
+
+                        <div class="chart-container">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+
+
+                        <div class="monthly-report-list">
+
+                            {% for month in monthly_summary %}
+
+                                <div class="monthly-report-row">
+
+                                    <div>
+
+                                        <strong>
+                                            {{ month.month }}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="monthly-report-values">
+
+                                        <span class="income-value">
+                                            +₹{{ "%.2f"|format(month.income or 0) }}
+                                        </span>
+
+                                        <span class="expense-value">
+                                            -₹{{ "%.2f"|format(month.expenses or 0) }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                    {% else %}
+
+                        <div class="report-empty-state">
+
+                            <p>
+                                No monthly transaction data available yet.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- Chart.js -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<!-- Report data generated by Flask/Jinja -->
+
+<script id="report-data" type="application/json">
+{
+    "categoryLabels": {{ category_expenses | map(attribute="name") | list | tojson }},
+    "categoryValues": {{ category_expenses | map(attribute="total") | list | tojson }},
+    "monthlyLabels": {{ monthly_summary | map(attribute="month") | list | reverse | list | tojson }},
+    "monthlyIncome": {{ monthly_summary | map(attribute="income") | list | reverse | list | tojson }},
+    "monthlyExpenses": {{ monthly_summary | map(attribute="expenses") | list | reverse | list | tojson }}
+}
+</script>
+
+
+<!-- Chart scripts -->
+
+<script>
+
+    const reportData = JSON.parse(
+        document.getElementById("report-data").textContent
+    );
+
+
+    /*
+     * Expenses by category
+     */
+
+    const categoryLabels = reportData.categoryLabels;
+    const categoryValues = reportData.categoryValues;
+
+
+    /*
+     * Monthly income and expenses
+     */
+
+    const monthlyLabels = reportData.monthlyLabels;
+    const monthlyIncome = reportData.monthlyIncome;
+    const monthlyExpenses = reportData.monthlyExpenses;
+
+
+    /*
+     * Category doughnut chart
+     */
+
+    const categoryCanvas = document.getElementById("categoryChart");
+
+
+    if (categoryCanvas && categoryLabels.length > 0) {
+
+        new Chart(categoryCanvas, {
+
+            type: "doughnut",
+
+            data: {
+
+                labels: categoryLabels,
+
+                datasets: [
+                    {
+                        data: categoryValues,
+                        borderWidth: 2
+                    }
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        position: "bottom",
+
+                        labels: {
+
+                            padding: 18,
+
+                            usePointStyle: true
+
+                        }
+
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label: function(context) {
+
+                                const value = context.raw || 0;
+
+                                return " ₹" + Number(value).toLocaleString(
+                                    "en-IN",
+                                    {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+
+    /*
+     * Monthly income vs expenses chart
+     */
+
+    const monthlyCanvas = document.getElementById("monthlyChart");
+
+
+    if (monthlyCanvas && monthlyLabels.length > 0) {
+
+        new Chart(monthlyCanvas, {
+
+            type: "bar",
+
+            data: {
+
+                labels: monthlyLabels,
+
+                datasets: [
+
+                    {
+
+                        label: "Income",
+
+                        data: monthlyIncome,
+
+                        borderWidth: 1
+
+                    },
+
+                    {
+
+                        label: "Expenses",
+
+                        data: monthlyExpenses,
+
+                        borderWidth: 1
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+
+                            callback: function(value) {
+
+                                return "₹" + Number(value).toLocaleString(
+                                    "en-IN"
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                plugins: {
+
+                    legend: {
+
+                        position: "bottom",
+
+                        labels: {
+
+                            padding: 18,
+
+                            usePointStyle: true
+
+                        }
+
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label: function(context) {
+
+                                const value = context.raw || 0;
+
+                                return " " +
+                                    context.dataset.label +
+                                    ": ₹" +
+                                    Number(value).toLocaleString(
+                                        "en-IN",
+                                        {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        }
+                                    );
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+</script>
+
+
+{% endblock %}

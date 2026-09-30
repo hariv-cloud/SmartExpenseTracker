@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}Budget | Smart Expense Tracker{% endblock %}
+
+{% block content %}
+
+<div class="app-shell">
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-mark">S</div>
+
+            <div>
+                <h2>Smart Expense</h2>
+                <p>Personal Finance</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('add_transaction') }}" class="nav-item">
+                <span class="nav-icon">＋</span>
+                <span>Add Transaction</span>
+            </a>
+
+            <a href="{{ url_for('transactions') }}" class="nav-item">
+                <span class="nav-icon">☷</span>
+                <span>Transactions</span>
+            </a>
+
+            <a href="{{ url_for('budget') }}" class="nav-item active">
+                <span class="nav-icon">▣</span>
+                <span>Budget</span>
+            </a>
+
+            <a href="{{ url_for('reports') }}" class="nav-item">
+                <span class="nav-icon">◌</span>
+                <span>Reports</span>
+            </a>
+
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <span class="nav-icon">◯</span>
+                <span>Profile</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+                    {{ session.get("user_name", "U")[0]|upper }}
+                </div>
+
+                <div>
+                    <strong>
+                        {{ session.get("user_name", "User") }}
+                    </strong>
+
+                    <span>Personal account</span>
+                </div>
+
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <main class="dashboard-main">
+
+        <div class="page-header">
+
+            <div>
+                <p class="eyebrow">PLANNING</p>
+
+                <h1>Monthly budget</h1>
+
+                <p class="page-subtitle">
+                    Set a spending limit and keep track of your monthly expenses.
+                </p>
+            </div>
+
+        </div>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                <div class="budget-messages">
+
+                    {% for category, message in messages %}
+
+                        <div class="budget-message {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <section class="budget-page">
+
+            <div class="budget-top-grid">
+
+                <div class="budget-card budget-summary-card">
+
+                    <div class="budget-card-header">
+
+                        <div>
+                            <p class="card-label">CURRENT BUDGET</p>
+                            <h2>{{ month_name }} {{ selected_year }}</h2>
+                        </div>
+
+                        <span class="budget-icon">₹</span>
+
+                    </div>
+
+                    <div class="budget-main-amount">
+                        ₹{{ "%.2f"|format(budget_amount) }}
+                    </div>
+
+                    <p class="budget-description">
+                        Your spending limit for this month.
+                    </p>
+
+                </div>
+
+
+                <div class="budget-card budget-spent-card">
+
+                    <div class="budget-card-header">
+
+                        <div>
+                            <p class="card-label">SPENT</p>
+                            <h2>This month</h2>
+                        </div>
+
+                        <span class="budget-icon">↗</span>
+
+                    </div>
+
+                    <div class="budget-main-amount">
+                        ₹{{ "%.2f"|format(spent_amount) }}
+                    </div>
+
+                    <p class="budget-description">
+                        Total expenses recorded this month.
+                    </p>
+
+                </div>
+
+
+                <div class="budget-card budget-remaining-card">
+
+                    <div class="budget-card-header">
+
+                        <div>
+                            <p class="card-label">REMAINING</p>
+                            <h2>Available</h2>
+                        </div>
+
+                        <span class="budget-icon">✓</span>
+
+                    </div>
+
+                    <div class="budget-main-amount
+                        {% if remaining_amount < 0 %}
+                            budget-negative
+                        {% endif %}
+                    ">
+                        ₹{{ "%.2f"|format(remaining_amount) }}
+                    </div>
+
+                    <p class="budget-description">
+
+                        {% if remaining_amount < 0 %}
+                            You are over your monthly budget.
+                        {% elif budget_amount == 0 %}
+                            Set a budget to start tracking.
+                        {% else %}
+                            Amount left before reaching your limit.
+                        {% endif %}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="budget-content-grid">
+
+                <div class="budget-card budget-progress-card">
+
+                    <div class="budget-section-header">
+
+                        <div>
+                            <p class="card-label">SPENDING PROGRESS</p>
+                            <h2>{{ month_name }} overview</h2>
+                        </div>
+
+                        <strong>
+                            {{ "%.0f"|format(progress_percentage) }}%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="budget-progress-track">
+
+    <div
+        class="budget-progress-fill
+            {% if remaining_amount < 0 %}
+                over-budget
+            {% endif %}
+        "
+        data-progress="{{ progress_percentage }}"
+    ></div>
+
+</div>
+
+                    <div class="budget-progress-details">
+
+                        <span>
+                            ₹{{ "%.2f"|format(spent_amount) }} spent
+                        </span>
+
+                        <span>
+                            ₹{{ "%.2f"|format(budget_amount) }} budget
+                        </span>
+
+                    </div>
+
+
+                    {% if budget_amount == 0 %}
+
+                        <div class="budget-status neutral">
+                            Set your monthly budget below to start tracking your progress.
+                        </div>
+
+                    {% elif remaining_amount < 0 %}
+
+                        <div class="budget-status danger">
+                            You have exceeded your budget by
+                            <strong>
+                                ₹{{ "%.2f"|format(remaining_amount|abs) }}
+                            </strong>.
+                        </div>
+
+                    {% elif progress_percentage >= 80 %}
+
+                        <div class="budget-status warning">
+                            You have used most of your monthly budget. Keep an eye on your spending.
+                        </div>
+
+                    {% else %}
+
+                        <div class="budget-status success">
+                            You are within your monthly spending limit.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="budget-card budget-form-card">
+
+                    <div class="budget-section-header">
+
+                        <div>
+                            <p class="card-label">SET BUDGET</p>
+                            <h2>Monthly limit</h2>
+                        </div>
+
+                    </div>
+
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('budget') }}"
+                        class="budget-form"
+                    >
+
+                        <div class="budget-form-row">
+
+                            <div class="budget-form-group">
+
+                                <label for="month">
+                                    Month
+                                </label>
+
+                                <select
+                                    id="month"
+                                    name="month"
+                                    required
+                                >
+
+                                    {% for month_number in range(1, 13) %}
+
+                                        <option
+                                            value="{{ month_number }}"
+                                            {% if month_number == selected_month %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            {{
+                                                [
+                                                    "January",
+                                                    "February",
+                                                    "March",
+                                                    "April",
+                                                    "May",
+                                                    "June",
+                                                    "July",
+                                                    "August",
+                                                    "September",
+                                                    "October",
+                                                    "November",
+                                                    "December"
+                                                ][month_number - 1]
+                                            }}
+                                        </option>
+
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="budget-form-group">
+
+                                <label for="year">
+                                    Year
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="year"
+                                    name="year"
+                                    value="{{ selected_year }}"
+                                    min="2000"
+                                    max="2100"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="budget-form-group">
+
+                            <label for="amount">
+                                Budget amount
+                            </label>
+
+                            <div class="budget-amount-input">
+
+                                <span>₹</span>
+
+                                <input
+                                    type="number"
+                                    id="amount"
+                                    name="amount"
+                                    value="{% if budget_amount > 0 %}{{ budget_amount }}{% endif %}"
+                                    min="0.01"
+                                    step="0.01"
+                                    placeholder="Enter monthly budget"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button budget-save-button"
+                        >
+                            Save budget
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+{% endblock %}
